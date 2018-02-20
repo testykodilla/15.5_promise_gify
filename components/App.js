@@ -7,35 +7,37 @@ App = React.createClass({
         };
     },
 
-    handleSearch: function(searchingText) { 
+    handleSearch(searchingText) { 
         this.setState({
           loading: true 
         });
-        this.getGif(searchingText, function(gif) {  
-          this.setState({ 
-            loading: false, 
-            gif: gif,  
-            searchingText: searchingText 
-          });
-        }.bind(this));
+        this.getGif(searchingText).then(gif => {
+            this.setState({ 
+                loading: false, 
+                gif,
+                searchingText
+            });
+        });
       },
       
-      getGif: function(searchingText, callback) {  
-        var url = 'http://api.giphy.com/v1/gifs/search?q=' + searchingText + '&api_key=vbHVD8gM0h4cKfq4nD6L8EE7qARgHucy';  
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-               var data = JSON.parse(xhr.responseText).data;
-               var gifNumberData = Math.floor(Math.random() * data.length);
-               var gif = {  
-                url: data[gifNumberData].images.fixed_width_downsampled.url,
-                sourceUrl: data[gifNumberData].url
-};
-                callback(gif); 
+    getGif(searchingText) {  
+        return new Promise((resolve, reject) => {
+            var url = 'http://api.giphy.com/v1/gifs/search?q=' + searchingText + '&api_key=vbHVD8gM0h4cKfq4nD6L8EE7qARgHucy';  
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var data = JSON.parse(xhr.responseText).data;
+                    var gifNumberData = Math.floor(Math.random() * data.length);
+                    var gif = {  
+                        url: data[gifNumberData].images.fixed_width_downsampled.url,
+                        sourceUrl: data[gifNumberData].url
+                    };
+                    resolve(gif);
+                }
             }
-        };
-        xhr.send();
+            xhr.send();
+        });        
     },
 
     render: function() {
